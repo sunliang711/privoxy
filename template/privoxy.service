@@ -1,0 +1,16 @@
+[Unit]
+Description=SERVICENAME
+After=network.target
+
+[Service]
+Environment=PIDFILE=/tmp/SERVICENAME.pid
+Environment=CONFIG=ROOT/runtime/CONFIGFILE
+Type=forking
+PIDFile=/tmp/global.privoxy.pid
+ExecStart=PRIVOXY --pidfile $PIDFILE $CONFIG
+ExecStopPost=/bin/rm -f $PIDFILE
+SuccessExitStatus=15
+
+
+[Install]
+WantedBy=multi-user.target

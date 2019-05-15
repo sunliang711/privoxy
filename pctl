@@ -1,0 +1,234 @@
+#!/bin/bash
+rpath="$(readlink ${BASH_SOURCE})"
+if [ -z "$rpath" ];then
+    rpath=${BASH_SOURCE}
+fi
+root="$(cd $(dirname $rpath) && pwd)"
+cd "$root"
+RED=$(tput setaf 1)
+RESET=$(tput sgr0)
+
+user=${SUDO_USER:-$(whoami)}
+home=$(eval echo ~$user)
+
+db="$(cat db)"
+
+mylog(){
+    datetime=$(date +%FT%T)
+    echo "$datetime $*"
+}
+
+usage(){
+    cat<<-EOF
+	Usage: $(basename $0)
+	CMD:
+	    start [id]
+	    stop [id]
+	    restart [id]
+	    status [id]
+        add
+        list
+        delete <id>
+	    edit [id]
+	    pac [id]
+	    log [id]
+	    em
+	EOF
+}
+
+# the following line comes from install.sh
+# sqlite3 "$db" "CREATE TABLE config(id integer primary key autoincrement,name varchar,local_port int unique,upstream varchar,logdir varchar,ispac int);"
+add(){
+    echo "Enter name local_port upstream [ispac:default 0] [logdir:default /tmp] [id]"
+    read name local_port upstream ispac logdir id
+    if [ -z $name ] || [ -z $local_port ] || [ -z "$upstream" ];then
+        echo "${RED}Input error.${RESET}"
+        exit 1
+    fi
+    if [ -z $logdir ];then
+        logdir=/tmp
+    fi
+    if [ -z $ispac ];then
+        ispac=0
+    fi
+    mylog "insert data..."
+    if [ -z $id ];then
+        sqlite3 "$db" "insert into config(name,local_port,upstream,logdir,ispac) values('$name',$local_port,'$upstream','$logdir',$ispac);" || { echo "${RED}Add failed.${RESET}"; exit 1; }
+    else
+        sqlite3 "$db" "insert into config(id,name,local_port,upstream,logdir,ispac) values($id,'$name',$local_port,'$upstream','$logdir',$ispac);" || { echo "${RED}Add failed.${RESET}"; exit 1; }
+    fi
+}
+
+list(){
+    echo -e ".header on\n.mode column\n.width 5 20 10\n select * from config;" | sqlite3 "$db"
+}
+
+delete(){
+    id=${1:?'missing id'}
+    NAME="$(bash name.sh $id)"
+    rm runtime/$NAME.config
+    servicename=$NAME
+    case $(uname) in
+        Linux)
+        #TODO delete service file
+        ;;
+        Darwin)
+            rm $home/Library/LaunchAgents/$servicename.plist
+        ;;
+
+    esac
+    
+    stop $id
+    sqlite3 "$db" "delete from config where id=$id;"
+}
+
+start(){
+    id=${1:?'missing id'}
+    #tmux new-session -d -s "pac" privoxy --no-daemon --pidfile /tmp/pac.privoxy.pid $root/runtime/pac.config
+    #tmux new-window -d -t "privoxy"  privoxy --no-daemon --pidfile /tmp/global.privoxy.pid $root/runtime/global.config
+    #tmux new-session -d -s "global"  privoxy --no-daemon --pidfile /tmp/global.privoxy.pid $root/runtime/global.config
+
+    #TODO 如果存在了怎么办
+    bash createConfig.sh "$id"
+    NAME="$(bash name.sh $id)"
+    servicename="$NAME"
+
+    case $(uname) in
+        Linux)
+            if (($EUID!=0));then
+                sudo systemctl start $servicename.service
+            else
+                systemctl start $servicename.service
+            fi
+            ;;
+        Darwin)
+            launchctl load -w $home/Library/LaunchAgents/$servicename.plist
+            ;;
+    esac
+}
+
+stop(){
+    id=${1:?'missing id'}
+    NAME="$(bash name.sh $id)"
+    servicename="$NAME"
+    #tmux kill-session -t "pac"
+    #tmux kill-session -t "global"
+    case $(uname) in
+        Linux)
+            if (($EUID!=0));then
+                sudo systemctl stop $servicename
+                sudo systemctl stop $servicename
+            else
+                systemctl stop $servicename
+                systemctl stop $servicename
+            fi
+            ;;
+        Darwin)
+            launchctl unload -w $home/Library/LaunchAgents/$servicename.plist
+            ;;
+    esac
+}
+
+status(){
+    id=${1:?'missing id'}
+    NAME="$(bash name.sh $id)"
+    servicename="$NAME"
+    case $(uname) in
+        Linux)
+            systemctl status $servicename.service
+            systemctl status $servicename.service
+            ;;
+        Darwin)
+            launchctl list | grep $servicename
+            launchctl list | grep $servicename
+            ;;
+    esac
+}
+
+pac(){
+    editor=vi
+    if command -v vim >/dev/null 2>&1;then
+        editor=vim
+    fi
+
+    case $(uname) in
+        Linux)
+            STAT='stat'
+            ;;
+        Darwin)
+            STAT='stat -x'
+            ;;
+    esac
+    pacFile=template/pac.action
+    before="$($STAT $pacFile | grep Modify)" 
+
+    $editor template/pac.action
+
+    after="$($STAT $pacFile | grep Modify)" 
+
+    if [ "$before" != "$after" ];then
+        echo "Please ${RED}Restart${RESET} manually."
+    else
+        echo "pac file not changed."
+    fi
+
+}
+
+log(){
+    id=${1:?'missing id'}
+
+    record="$(bash queryById.sh $id)"
+    # must set IFS
+    IFS=$'|'
+    # must use "$record" instead of $record
+    read name local_port upstream logdir ispac <<< "$record"
+    NAME="$(bash name.sh $id)"
+    logfile="$NAME.log"
+    tail -f $logdir/$logfile
+}
+
+em(){
+    editor=vi
+    if command -v vim>/dev/null 2>&1;then
+        editor=vim
+    fi
+    $editor ${BASH_SOURCE}
+}
+
+cmd=$1
+case $cmd in
+    add)
+        add
+        ;;
+    list)
+        list
+        ;;
+    del|delete)
+        delete $2
+        ;;
+    start)
+        start $2
+        ;;
+    restart)
+        stop $2
+        start $2
+        ;;
+    stop)
+        stop $2
+        ;;
+    pac)
+        pac
+        ;;
+    status)
+        status $2
+        ;;
+    log)
+        log $2
+        ;;
+    em)
+        em
+        ;;
+    *)
+        usage
+        ;;
+esac

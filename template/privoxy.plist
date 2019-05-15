@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>SERVICENAME</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>PRIVOXY</string>
+        <string>--no-daemon</string>
+        <string>ROOT/runtime/CONFIGFILE</string>
+    </array>
+    <key>StandardOutPath</key>
+    <string>LOGDIR/LOGFILE</string>
+    <key>StandardErrorPath</key>
+    <string>LOGDIR/LOGFILE</string>
+    <key>RunAtLoad</key>
+    <true/>
+</dict>
+</plist>
