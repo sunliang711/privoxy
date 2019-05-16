@@ -66,6 +66,10 @@ list(){
 delete(){
     id=${1:?'missing id'}
     NAME="$(bash name.sh $id)"
+    if [ -z "$NAME" ];then
+        echo "No such service with id: $id"
+        exit 1
+    fi
     stop $id
     if [ -e runtime/$NAME.config ];then
         rm runtime/$NAME.config
@@ -127,6 +131,10 @@ start(){
 stop(){
     id=${1:?'missing id'}
     NAME="$(bash name.sh $id)"
+    if [ -z "$NAME" ];then
+        echo "No such service with id: $id"
+        exit 1
+    fi
     servicename="$NAME"
     #tmux kill-session -t "pac"
     #tmux kill-session -t "global"
@@ -149,14 +157,16 @@ stop(){
 status(){
     id=${1:?'missing id'}
     NAME="$(bash name.sh $id)"
+    if [ -z "$NAME" ];then
+        echo "No such service with id: $id"
+        exit 1
+    fi
     servicename="$NAME"
     case $(uname) in
         Linux)
             systemctl status $servicename.service
-            systemctl status $servicename.service
             ;;
         Darwin)
-            launchctl list | grep $servicename
             launchctl list | grep $servicename
             ;;
     esac
@@ -194,12 +204,16 @@ pac(){
 log(){
     id=${1:?'missing id'}
 
+    NAME="$(bash name.sh $id)"
+    if [ -z "$NAME" ];then
+        echo "No such service with id: $id"
+        exit 1
+    fi
     record="$(bash queryById.sh $id)"
     # must set IFS
     IFS=$'|'
     # must use "$record" instead of $record
     read name local_port upstream logdir ispac <<< "$record"
-    NAME="$(bash name.sh $id)"
     logfile="$NAME.log"
     tail -f $logdir/$logfile
 }
