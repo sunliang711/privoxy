@@ -26,9 +26,9 @@ usage(){
 	    stop [id]
 	    restart [id]
 	    status [id]
-        add
-        list
-        delete <id>
+	    add
+	    list
+	    delete <id>
 	    edit [id]
 	    pac [id]
 	    log [id]
@@ -66,19 +66,24 @@ list(){
 delete(){
     id=${1:?'missing id'}
     NAME="$(bash name.sh $id)"
-    rm runtime/$NAME.config
+    stop $id
+    if [ -e runtime/$NAME.config ];then
+        rm runtime/$NAME.config
+    fi
     servicename=$NAME
     case $(uname) in
         Linux)
         #TODO delete service file
+            echo TODO
         ;;
         Darwin)
-            rm $home/Library/LaunchAgents/$servicename.plist
+            if [ -e $home/Library/LaunchAgents/$servicename.plist ];then
+                rm $home/Library/LaunchAgents/$servicename.plist
+            fi
         ;;
 
     esac
     
-    stop $id
     sqlite3 "$db" "delete from config where id=$id;"
 }
 
