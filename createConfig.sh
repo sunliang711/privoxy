@@ -29,6 +29,10 @@ logfile="$NAME.log"
 servicename="$NAME"
 configfile="$NAME.config"
 
+if [ ! -d runtime ];then
+    mkdir runtime
+fi
+
 if (($ispac == 1));then
     log "Making actionsfile($actionsfile)..."
     #TODO 是否要先判断是否已经存在runtime/$actionsfile,存在的话,就不用tempalte里的重新生成,这样每个id都自己维护自己的pac
