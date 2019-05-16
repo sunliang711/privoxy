@@ -112,7 +112,7 @@ start(){
             ;;
         Darwin)
             launchctl load -w $home/Library/LaunchAgents/$servicename.plist
-            echo "Set system http and https proxy? [y/n]" 
+            echo "Set system http and https proxy? [y/n]"
             read ans
             if [ "$ans" == 'y' ];then
                 record="$(bash queryById.sh $id)"
@@ -150,6 +150,11 @@ stop(){
             ;;
         Darwin)
             launchctl unload -w $home/Library/LaunchAgents/$servicename.plist
+            echo "Clear system http and https proxy? [y/n]"
+            read ans
+            if [ "$ans" == 'y' ];then
+                bash setMacProxy.sh unset
+            fi
             ;;
     esac
 }
