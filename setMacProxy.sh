@@ -96,7 +96,7 @@ unsetPac(){
     if [ -n "$pacServerPort" ];then
         echo "pacServerPort: $pacServerPort"
         pid="$(lsof -iTCP -sTCP:LISTEN -P | grep $pacServerPort | awk '{print $2}')"
-        kill -s TERM $pid
+        kill -s TERM $pid >/dev/null 2>&1
     else
         echo "pacServerPort is null"
     fi
