@@ -93,7 +93,7 @@ start(){
     #tmux new-window -d -t "privoxy"  privoxy --no-daemon --pidfile /tmp/global.privoxy.pid $root/runtime/global.config
     #tmux new-session -d -s "global"  privoxy --no-daemon --pidfile /tmp/global.privoxy.pid $root/runtime/global.config
 
-    #TODO 如果存在了怎么办
+    #TODO 如果存在了怎么办;现在是每次开启都从新生成相关配置文件、服务文件
     bash createConfig.sh "$id"
     NAME="$(bash name.sh $id)"
     servicename="$NAME"
