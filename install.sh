@@ -101,26 +101,7 @@ function install(){
 function uninstall(){
     cd "$root"
     echo "uninstall()"
-    case $(uname) in
-        Linux)
-            cmds=$(cat<<-EOF
-				systemctl stop $PAC_PRIVOXY
-				systemctl stop $GLOBAL_PRIVOXY
-				systemctl disable $PAC_PRIVOXY
-				systemctl disable $GLOBAL_PRIVOXY
-				rm /etc/systemd/system/$PAC_PRIVOXY.service
-				rm /etc/systemd/system/$GLOBAL_PRIVOXY.service
-				rm /usr/local/bin/pctl
-				EOF
-            )
-            sudo -- sh -c "$cmds"
-            ;;
-        Darwin)
-            launchctl unload $home/Library/LaunchAgents/global.privoxy.plist
-            launchctl unload $home/Library/LaunchAgents/pac.privoxy.plist
-            sudo rm /usr/local/bin/pctl
-            ;;
-    esac
+    sudo rm /usr/local/bin/pctl
     cd "$root"
 }
 
