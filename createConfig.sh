@@ -53,12 +53,13 @@ case $(uname) in
         fi
         sed -e "s|SERVICENAME|$servicename|g" -e "s|CONFIGFILE|$configfile|g" \
             -e "s|PRIVOXY|$(which privoxy)|g" -e "s|ROOT|$root|g" \
-            -e "s|LOGDIR|$logdir|g" -e "s|LOGFILE|$logfile|g" template/privoxy.plist > $home/Library/LaunchAgents/$servicename.plist
+            -e "s|LOGDIR|$logdir|g" -e "s|LOGFILE|$logfile|g" template/privoxy.plist > runtime/$servicename.plist
+        ln -sf "$root/runtime/$servicename.plist" $home/Library/LaunchAgents
     ;;
     Linux)
         log "Making service file($servicename)..."
-        #TODO service文件放到/etc/systemd/system,另外要用sudo
         sed -e "s|SERVICENAME|$servicename|g" -e "s|CONFIGFILE|$configfile|g" \
             -e "s|PRIVOXY|$(which privoxy)|g" -e "s|ROOT|$root|g" template/privoxy.service > runtime/$servicename.service
+        sudo ln -sf "$root/runtime/$servicename.service" /etc/systemd/system
     ;;
 esac

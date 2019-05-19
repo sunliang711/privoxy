@@ -69,26 +69,14 @@ delete(){
     id=${1:?'missing id'}
     NAME="$(bash name.sh $id)"
     if [ -z "$NAME" ];then
-        echo "No such service with id: $id"
         exit 1
     fi
     stop $id
-    if [ -e runtime/$NAME.config ];then
-        rm runtime/$NAME.config
-    fi
-    servicename=$NAME
-    case $(uname) in
-        Linux)
-        #TODO delete service file
-            echo TODO
-        ;;
-        Darwin)
-            if [ -e $home/Library/LaunchAgents/$servicename.plist ];then
-                rm $home/Library/LaunchAgents/$servicename.plist
-            fi
-        ;;
-
-    esac
+    rm runtime/$NAME.action 2>/dev/null
+    rm runtime/$NAME.config 2>/dev/null
+    rm runtime/$NAME.plist 2>/dev/null
+    rm runtime/$NAME.service 2>/dev/null
+    rm $home/Library/LaunchAgents/$NAME.plist 2>/dev/null
 
     sqlite3 "$db" "delete from config where id=$id;"
 }
