@@ -3,3 +3,4 @@
 .vscode/
 .idea/
 config.db
+/macProxy/pacDirectory

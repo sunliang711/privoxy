@@ -29,10 +29,9 @@ usage(){
 	    add
 	    list
 	    del|delete|rm|remove <id>
-	    edit <id>
 	    pac <id>
 	    log <id>
-	    edit <id> [-n NAME] [-n LOCAL_PORT] [-n UPSTREAM] [-n LOGDIR] [-n ISPAC]
+	    edit <id> [-n NAME] [-l LOCAL_PORT] [-u UPSTREAM] [-L LOGDIR] [-p ISPAC]
 	    copy|cp <id> [newid]
 	    em
 	EOF
@@ -122,9 +121,9 @@ start(){
                 IFS=$'|'
                 #must use "$record" instead of $record
                 read unuse_name local_port upstream logdir ispac <<< "$record"
-                bash setMacProxy.sh unset
-                bash setMacProxy.sh http ${local_port}
-                bash setMacProxy.sh https ${local_port}
+                bash macProxy/setMacProxy.sh unset
+                bash macProxy/setMacProxy.sh http ${local_port}
+                bash macProxy/setMacProxy.sh https ${local_port}
             fi
             ;;
     esac
@@ -155,7 +154,7 @@ stop(){
             echo "Clear system http and https proxy? [y/n]"
             read ans
             if [ "$ans" == 'y' ];then
-                bash setMacProxy.sh unset
+                bash macProxy/setMacProxy.sh unset
             fi
             ;;
     esac

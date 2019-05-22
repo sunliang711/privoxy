@@ -3,9 +3,10 @@ rpath=$(readlink ${BASH_SOURCE})
 if [ -z "$rpath" ];then
     rpath=${BASH_SOURCE}
 fi
-me="$(cd $(dirname $rpath) && pwd)"
-cd $me
-
+root="$(cd $(dirname $rpath) && pwd)"
+cd $root
+user=${SUDO_USER:-$(whoami)}
+home=$(eval echo ~$user)
 
 enX="$(route -n get 8.8.8.8 | perl -ne 'print $2 if /(interface:\s*)(\w+)/')"
 
@@ -17,7 +18,6 @@ defaultPacServerPort=28989
 # defaultPacServerDirectory=$(pwd)
 defaultPacfile=gfwlist.pac
 
-pacServerPortFile=/tmp/pacServerPortFile
 
 msg(){
     echo "enX: $enX"
@@ -34,9 +34,9 @@ usage(){
 		https   <port>
 		socks   <port>
 
-		pac     <LOCAL_PROXY_PORT> [serverport]
+		pac     <upstream> [serverport]
 		        defaultPacServerPort:           $defaultPacServerPort
-		unset
+		unset   [http | https | socks | pac] (empty for all)
 	EOF
 }
 
@@ -61,21 +61,24 @@ setSocksProxy(){
 
 setPac(){
     pacServerHost=$host
-    upstreamPort=${1:?'missing upstream port'}
+    upstream=${1:?'missing upstream: for example localhost:1080'}
     pacServerPort=${2:-$defaultPacServerPort}
+    if [ ! -d pacDirectory ];then
+        mkdir pacDirectory
+    fi
+    sed -e "s|PACDIRECTORY|$root/pacDirectory|g" \
+        -e "s|PYTHON|$(which python)|g" \
+        -e "s|PORT|$pacServerPort|g" pacServer.plist > $home/Library/LaunchAgents/pacServer.plist
 
-    sed -e "s|UPSTREAMPORT|$upstreamPort|g" gfwlist.pac > proxy.pac
+    sed -e "s|UPSTREAM|$upstream|g" gfwlist.pac > pacDirectory/proxy.pac
+
     cat<<-EOF
 		pacServerHost: $pacServerHost
 		pacServerPort: $pacServerPort
 	EOF
-    if ! command -v python3 >/dev/null 2>&1;then
-        nohup python -m SimpleHTTPServer $pacServerPort >/dev/null 2>&1 &
-    else
-        nohup python3 -m http.server $pacServerPort --bind=$pacServerHost >/dev/null 2>&1 &
-    fi
+    launchctl unload -w $home/Library/LaunchAgents/pacServer.plist 2>/dev/null
+    launchctl load -w $home/Library/LaunchAgents/pacServer.plist
     networksetup -setautoproxyurl $cnw "http://$host:$pacServerPort/proxy.pac"
-    echo -n "$pacServerPort" > $pacServerPortFile
 }
 
 unsetHttpProxy(){
@@ -91,18 +94,34 @@ unsetSocksProxy(){
 }
 
 unsetPac(){
+    launchctl unload -w $home/Library/LaunchAgents/pacServer.plist 2>/dev/null
     networksetup -setautoproxystate $cnw off
-    pacServerPort="$(cat $pacServerPortFile 2>/dev/null)"
-    if [ -n "$pacServerPort" ];then
-        echo "pacServerPort: $pacServerPort"
-        pid="$(lsof -iTCP -sTCP:LISTEN -P | grep $pacServerPort | awk '{print $2}')"
-        kill -s TERM $pid >/dev/null 2>&1
-    else
-        echo "pacServerPort is null"
-    fi
-
 }
 
+unset(){
+    typ=${1}
+    case "$typ" in
+        http)
+            unsetHttpProxy
+            ;;
+        https)
+            unsetHttpsProxy
+            ;;
+        socks)
+            unsetSocksProxy
+            ;;
+        pac)
+            unsetPac
+            ;;
+        *)
+            unsetHttpProxy
+            unsetHttpsProxy
+            unsetSocksProxy
+            unsetPac
+            ;;
+
+    esac
+}
 
 case $1 in
     http)
@@ -118,15 +137,12 @@ case $1 in
         setSocksProxy $port
         ;;
     pac)
-        port=$2
+        upstream=$2
         pacsrvport=$3
-        setPac $port "$pacsrvport"
+        setPac $upstream "$pacsrvport"
         ;;
     unset)
-        unsetHttpProxy
-        unsetHttpsProxy
-        unsetSocksProxy
-        unsetPac
+        unset "$2"
         ;;
     *)
         usage

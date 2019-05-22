@@ -4,7 +4,7 @@
  */
 
 // var proxy = 'SOCKS5 127.0.0.1:1081';
-var proxy = 'SOCKS5 127.0.0.1:UPSTREAMPORT';
+var proxy = 'SOCKS5 UPSTREAM';
 var rules = [
     [
         [],

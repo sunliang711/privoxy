@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>pacServer</string>
+    <key>WorkingDirectory</key>
+    <string>PACDIRECTORY</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>PYTHON</string>
+        <string>-m</string>
+        <string>SimpleHTTPServer</string>
+        <string>PORT</string>
+    </array>
+    <key>StandardOutPath</key>
+    <string>/tmp/pacServer.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/pacServer.log</string>
+    <key>RunAtLoad</key>
+    <true/>
+</dict>
+</plist>
