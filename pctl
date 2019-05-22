@@ -22,19 +22,30 @@ usage(){
     cat<<-EOF
 	Usage: $(basename $0)
 	CMD:
-	    start <id>
-	    stop <id>
-	    restart <id>
-	    status <id>
+	    start       <id>
+	    stop        <id>
+	    restart     <id>
+	    status      <id>
 	    add
 	    list
-	    del|delete|rm|remove <id>
-	    pac <id>
-	    log <id>
-	    edit <id> [-n NAME] [-l LOCAL_PORT] [-u UPSTREAM] [-L LOGDIR] [-p ISPAC]
-	    copy|cp <id> [newid]
+	    del         <id>
+	    pac         <id>    edit pac file
+	    log         <id>
+	    edit        <id> [-n NAME] [-l LOCAL_PORT] [-u UPSTREAM] [-L LOGDIR] [-p ISPAC]
+	    copy|cp     <id> [newid]
 	    em
 	EOF
+    if [ "$(uname)" == "Darwin" ];then
+        cat<<-EOF
+
+	    pacProxy        <upstream> [pacServerPort]    set MacOS system pac proxy
+	    unsetPacProxy
+	    socksProxy      <socks port>
+	    unsetSocksProxy
+	EOF
+    fi
+
+    exit 1
 }
 
 # the following line comes from install.sh
@@ -299,6 +310,24 @@ em(){
     $editor ${BASH_SOURCE}
 }
 
+pacProxy(){
+    upstream=${1}
+    port=${2}
+    bash macProxy/setMacProxy.sh pac $upstream $port
+}
+
+unsetPacProxy(){
+    bash macProxy/setMacProxy.sh unset pac
+}
+
+socksProxy(){
+    port="$1"
+    bash macProxy/setMacProxy.sh socks "$port"
+}
+
+unsetSocksProxy(){
+    bash macProxy/setMacProxy.sh unset socks
+}
 cmd=$1
 shift
 case $cmd in
@@ -338,6 +367,18 @@ case $cmd in
         ;;
     em)
         em
+        ;;
+    pacProxy)
+        pacProxy "$@"
+        ;;
+    unsetPacProxy)
+        unsetPacProxy
+        ;;
+    socksProxy)
+        socksProxy "$@"
+        ;;
+    unsetSocksProxy)
+        unsetSocksProxy
         ;;
     *)
         usage

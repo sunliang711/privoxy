@@ -38,6 +38,7 @@ usage(){
 		        defaultPacServerPort:           $defaultPacServerPort
 		unset   [http | https | socks | pac] (empty for all)
 	EOF
+    usage
 }
 
 setHttpProxy(){
@@ -100,6 +101,13 @@ unsetPac(){
 
 unset(){
     typ=${1}
+    if [ -z "$typ" ];then
+        unsetHttpProxy
+        unsetHttpsProxy
+        unsetSocksProxy
+        unsetPac
+        exit 0
+    fi
     case "$typ" in
         http)
             unsetHttpProxy
@@ -114,10 +122,7 @@ unset(){
             unsetPac
             ;;
         *)
-            unsetHttpProxy
-            unsetHttpsProxy
-            unsetSocksProxy
-            unsetPac
+            usage
             ;;
 
     esac
