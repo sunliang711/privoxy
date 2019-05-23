@@ -42,6 +42,8 @@ usage(){
 	    unsetPacProxy
 	    socksProxy      <socks port>
 	    unsetSocksProxy
+
+	    macProxy|mp        <options>
 	EOF
     fi
 
@@ -328,6 +330,11 @@ socksProxy(){
 unsetSocksProxy(){
     bash macProxy/setMacProxy.sh unset socks
 }
+
+macProxy(){
+    bash macProxy/setMacProxy.sh "$@"
+}
+
 cmd=$1
 shift
 case $cmd in
@@ -367,6 +374,9 @@ case $cmd in
         ;;
     em)
         em
+        ;;
+    macProxy|mp)
+        macProxy "$@"
         ;;
     pacProxy)
         pacProxy "$@"

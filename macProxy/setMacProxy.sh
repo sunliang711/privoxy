@@ -38,7 +38,7 @@ usage(){
 		        defaultPacServerPort:           $defaultPacServerPort
 		unset   [http | https | socks | pac] (empty for all)
 	EOF
-    usage
+    exit 1
 }
 
 setHttpProxy(){
