@@ -95,7 +95,22 @@ add(){
 }
 
 list(){
-    echo -e ".header on\n.mode column\n.width 5 20 10\n select * from config;" | sqlite3 "$db"
+    # echo -e ".header on\n.mode column\n.width 5 20 10\n select * from config;" | sqlite3 "$db"
+    records="$(sqlite3 "$db" "select id,name,local_port,upstream,logdir,ispac from config;")"
+    # echo "records: $records"
+    local id name local_port upstream logdir ispac
+    printf "%-5s %-15s ${green}%-15s${reset} %-30s %-15s %-15s\n" "id" "name" "local_port" "upstream" "logdir" "ispac"
+    echo
+    for r in $records;do
+        IFS=$'|'
+        read id name local_port upstream logdir ispac <<< "$r"
+        if lsof -iTCP -sTCP:LISTEN -P | grep -q "\<${local_port}\>";then
+            printf "%-5s %-15s ${green}%-15s${reset} %-30s %-15s %-15s\n" "$id" "$name" "${local_port}" "$upstream" "$logdir" "$ispac"
+        else
+            printf "%-5s %-15s ${red}%-15s${reset} %-30s %-15s %-15s\n" "$id" "$name" "${local_port}" "$upstream" "$logdir" "$ispac"
+        fi
+    done
+    
 }
 
 delete(){
