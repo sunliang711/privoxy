@@ -9,6 +9,30 @@ cd "$root"
 user="${SUDO_USER:-$(whoami)}"
 home="$(eval echo ~$user)"
 
+red=$(tput setaf 1)
+green=$(tput setaf 2)
+yellow=$(tput setaf 3)
+blue=$(tput setaf 4)
+cyan=$(tput setaf 5)
+reset=$(tput sgr0)
+runAsRoot(){
+    cmd="$@"
+    if [ -z "$cmd" ];then
+        echo "${red}Need cmd${reset}"
+        exit 1
+    fi
+
+    if (($EUID==0));then
+        sh -c "$cmd"
+    else
+        if ! command -v sudo >/dev/null 2>&1;then
+            echo "Need sudo cmd"
+            exit 1
+        fi
+        sudo sh -c "$cmd"
+    fi
+}
+
 log(){
     datetime=$(date +%FT%T)
     echo "$datetime $*"
@@ -60,6 +84,7 @@ case $(uname) in
         log "Making service file($servicename)..."
         sed -e "s|SERVICENAME|$servicename|g" -e "s|CONFIGFILE|$configfile|g" \
             -e "s|PRIVOXY|$(which privoxy)|g" -e "s|ROOT|$root|g" template/privoxy.service > runtime/$servicename.service
-        sudo ln -sf "$root/runtime/$servicename.service" /etc/systemd/system
+        runAsRoot ln -sf "$root/runtime/$servicename.service" /etc/systemd/system
+        runAsRoot systemctl daemon-reload
     ;;
 esac
