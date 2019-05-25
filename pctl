@@ -93,7 +93,20 @@ add(){
         sqlite3 "$db" "insert into config(id,name,local_port,upstream,logdir,ispac) values($id,'$name',$local_port,'$upstream','$logdir',$ispac);" || { echo "${red}Add failed.${reset}"; exit 1; }
     fi
 }
-
+LSOF(){
+    case $(uname) in
+        Linux)
+            if (($EUID!=0));then
+                sudo lsof "$@"
+            else
+                lsof "$@"
+            fi
+            ;;
+        Darwin)
+            lsof "$@"
+            ;;
+    esac
+}
 list(){
     # echo -e ".header on\n.mode column\n.width 5 20 10\n select * from config;" | sqlite3 "$db"
     records="$(sqlite3 "$db" "select id,name,local_port,upstream,logdir,ispac from config;")"
@@ -104,7 +117,7 @@ list(){
     for r in $records;do
         IFS=$'|'
         read id name local_port upstream logdir ispac <<< "$r"
-        if lsof -iTCP -sTCP:LISTEN -P | grep -q "\<${local_port}\>";then
+        if LSOF -iTCP -sTCP:LISTEN -P | grep -q "\<${local_port}\>";then
             printf "%-5s %-15s ${green}%-15s${reset} %-30s %-15s %-15s\n" "$id" "$name" "${local_port}" "$upstream" "$logdir" "$ispac"
         else
             printf "%-5s %-15s ${red}%-15s${reset} %-30s %-15s %-15s\n" "$id" "$name" "${local_port}" "$upstream" "$logdir" "$ispac"
