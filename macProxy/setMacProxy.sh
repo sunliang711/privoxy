@@ -56,8 +56,7 @@ usage(){
 		https   <port>
 		socks   <port>
 
-		pac     <upstream> [serverport]
-		        defaultPacServerPort:           $defaultPacServerPort
+		pac     [upstream:default: localhost:1080] [protocol: default: SOCKS5] [serverport]
 		unset   [http | https | socks | pac] (empty for all)
 	EOF
     exit 1
@@ -84,8 +83,9 @@ setSocksProxy(){
 
 setPac(){
     pacServerHost=$host
-    upstream=${1:?'missing upstream: for example localhost:1080'}
-    pacServerPort=${2:-$defaultPacServerPort}
+    upstream=${1:-"localhost:1080"}
+    protocol=${2:-"SOCKS5"}
+    pacServerPort=${3:-$defaultPacServerPort}
     if [ ! -d pacDirectory ];then
         mkdir pacDirectory
     fi
@@ -93,7 +93,9 @@ setPac(){
         -e "s|PYTHON|$(which python)|g" \
         -e "s|PORT|$pacServerPort|g" pacServer.plist > $home/Library/LaunchAgents/pacServer.plist
 
-    sed -e "s|UPSTREAM|$upstream|g" gfwlist.pac > pacDirectory/proxy.pac
+    sed -e "s|UPSTREAM|$upstream|g" \
+        -e "s|PROTOCOL|$protocol|g" \
+        gfwlist.pac > pacDirectory/proxy.pac
 
     cat<<-EOF
 		pacServerHost: $pacServerHost

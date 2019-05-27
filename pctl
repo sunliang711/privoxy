@@ -260,15 +260,18 @@ pac(){
         editor=vim
     fi
     pacFile=template/pac.action
-    sha1sum "${pacFile}" > "${pacFile}.sha1"
+    # sha1sum "${pacFile}" > "${pacFile}.sha1"
+    oldmd5sum="$(python md5.py ${pacFile})"
     $editor template/pac.action
-    if ! sha1sum -c --status "${pacFile}.sha1";then
+    newmd5sum="$(python md5.py ${pacFile})"
+    # if ! sha1sum -c --status "${pacFile}.sha1";then
+    if [ "$newmd5sum" != "$oldmd5sum" ];then
         echo "${blue}Pac file changed."
         echo "Restart related service when needed."
     else
         echo "${cyan}Pac file not changed."
     fi
-    rm "${pacFile}.sha1"
+    # rm "${pacFile}.sha1"
 }
 
 log(){
