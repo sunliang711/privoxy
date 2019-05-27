@@ -38,7 +38,7 @@ host=localhost
 
 defaultPacServerPort=28989
 # defaultPacServerDirectory=$(pwd)
-defaultPacfile=gfwlist.pac
+pacfile=gfwlist.pac
 
 
 msg(){
@@ -58,6 +58,9 @@ usage(){
 
 		pac     [upstream:default: localhost:1080] [protocol: default: SOCKS5] [serverport]
 		unset   [http | https | socks | pac] (empty for all)
+        
+		editPac
+
 	EOF
     exit 1
 }
@@ -95,7 +98,7 @@ setPac(){
 
     sed -e "s|UPSTREAM|$upstream|g" \
         -e "s|PROTOCOL|$protocol|g" \
-        gfwlist.pac > pacDirectory/proxy.pac
+        $pacfile > pacDirectory/proxy.pac
 
     cat<<-EOF
 		pacServerHost: $pacServerHost
@@ -152,26 +155,44 @@ unset(){
     esac
 }
 
-case $1 in
+editPac(){
+    editor=vi
+    if command -v vim >/dev/null 2>&1;then
+        editor=vim
+    fi
+    oldmd5sum="$(python ../md5.py $pacfile)"
+    $editor $pacfile
+    newmd5sum="$(python ../md5.py $pacfile)"
+
+    if [ "$oldmd5sum" != "$newmd5sum" ];then
+        echo "Pac file changed."
+        echo "Restart pac server if needed."
+    else
+        echo "Pac file not change."
+    fi
+
+}
+
+cmd=$1
+shift
+case $cmd in
     http)
-        port=$2
-        setHttpProxy $port
+        setHttpProxy "$@"
         ;;
     https)
-        port=$2
-        setHttpsProxy $port
+        setHttpsProxy "$@"
         ;;
     socks)
-        port=$2
-        setSocksProxy $port
+        setSocksProxy "$@"
         ;;
     pac)
-        upstream=$2
-        pacsrvport=$3
-        setPac $upstream "$pacsrvport"
+        setPac "$@"
         ;;
     unset)
-        unset "$2"
+        unset "$@"
+        ;;
+    editPac)
+        editPac "$@"
         ;;
     *)
         usage

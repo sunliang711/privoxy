@@ -5481,6 +5481,5 @@ var blockedHost = [
     "zyns.com",
     "zyzc9.com",
     "zzcartoon.com",
-    "zzcloud.me",
-    "zzux.com"
+    "zzcloud.me"
 ];
