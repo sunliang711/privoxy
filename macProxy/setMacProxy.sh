@@ -49,9 +49,9 @@ msg(){
 
 usage(){
     cat<<-EOF
-	Usage: $(basename $0) options
+	Usage: $(basename $0) CMD
 
-		options:
+		CMD:
 		    http    <port>
 		    https   <port>
 		    socks   <port>

@@ -41,7 +41,8 @@ mylog(){
 
 usage(){
     cat<<-EOF
-	Usage: $(basename $0)
+	Usage: $(basename $0) CMD
+
 	CMD:
 	    start       <id>
 	    stop        <id>
@@ -50,7 +51,7 @@ usage(){
 	    add
 	    list
 	    del         <id>
-	    pac         <id>    edit pac file
+	    pac         <id>    "edit pac file"
 	    log         <id>
 	    edit        <id>    [-n NAME] [-l LOCAL_PORT] [-u UPSTREAM] [-L LOGDIR] [-p ISPAC]
 	    copy|cp     <id>    [newid]
