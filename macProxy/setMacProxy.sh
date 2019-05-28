@@ -49,17 +49,17 @@ msg(){
 
 usage(){
     cat<<-EOF
-		Usage: $(basename $0) options
+	Usage: $(basename $0) options
 
 		options:
-		http    <port>
-		https   <port>
-		socks   <port>
+		    http    <port>
+		    https   <port>
+		    socks   <port>
 
-		pac     [upstream:default: localhost:1080] [protocol: default: SOCKS5] [serverport]
-		unset   [http | https | socks | pac] (empty for all)
-        
-		editPac
+		    pac     [upstream:default: localhost:1080] [protocol: default: SOCKS5] [serverport]
+		    unset   [http | https | socks | pac] (empty for all)
+
+		    editPac
 
 	EOF
     exit 1

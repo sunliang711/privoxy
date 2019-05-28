@@ -43,28 +43,23 @@ usage(){
     cat<<-EOF
 	Usage: $(basename $0)
 	CMD:
-	    start           <id>
-	    stop            <id>
-	    restart         <id>
-	    status          <id>
+	    start       <id>
+	    stop        <id>
+	    restart     <id>
+	    status      <id>
 	    add
 	    list
-	    del             <id>
-	    pac             <id>    edit pac file
-	    log             <id>
-	    edit            <id> [-n NAME] [-l LOCAL_PORT] [-u UPSTREAM] [-L LOGDIR] [-p ISPAC]
-	    copy|cp         <id> [newid]
+	    del         <id>
+	    pac         <id>    edit pac file
+	    log         <id>
+	    edit        <id>    [-n NAME] [-l LOCAL_PORT] [-u UPSTREAM] [-L LOGDIR] [-p ISPAC]
+	    copy|cp     <id>    [newid]
 	    em
 	EOF
     if [ "$(uname)" == "Darwin" ];then
         cat<<-EOF
 
-	    pacProxy        <upstream> [pacServerPort]    set MacOS system pac proxy
-	    unsetPacProxy
-	    socksProxy      <socks port>
-	    unsetSocksProxy
-
-	    macProxy|mp        <options>
+	    macProxy|mp <options>
 	EOF
     fi
 
