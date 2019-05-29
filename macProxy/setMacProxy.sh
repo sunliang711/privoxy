@@ -182,17 +182,17 @@ list(){
 
     if  echo "$autoproxyurl"| grep '^Enabled:' | grep -iq 'Yes';then
         url="$(networksetup -getautoproxyurl $cnw | perl -ne 'print $2 if /(URL:\s*)(.+)/')"
-        printf "Pac enabled at url: $green$url$reset\n"
+        printf "Pac   enabled at url: $green$url$reset\n"
     else
-        printf "Pac disabled.\n"
+        printf "Pac   ${red}disabled${reset}.\n"
     fi
 
     if echo "$webproxy" | grep '^Enabled:' | grep -iq 'Yes';then
         server="$(networksetup -getwebproxy $cnw | grep Server | perl -ne 'print $2 if /(Server:\s*)(.+)/')"
         port="$(networksetup -getwebproxy $cnw | grep Port| perl -ne 'print $2 if /(Port:\s*)(.+)/')"
-        printf "Http proxy enabled at $green$server:$port$reset.\n"
+        printf "Http  proxy enabled at $green$server:$port$reset.\n"
     else
-        printf "Http proxy disabled.\n"
+        printf "Http  proxy ${red}disabled${reset}.\n"
     fi
 
     if echo "$securewebproxy" | grep '^Enabled:' | grep -iq 'Yes';then
@@ -200,15 +200,15 @@ list(){
         port="$(networksetup -getsecurewebproxy $cnw | grep Port| perl -ne 'print $2 if /(Port:\s*)(.+)/')"
         printf "Https proxy enabled at $green$server:$port$reset.\n"
     else
-        printf "Https proxy disabled.\n"
+        printf "Https proxy ${red}disabled${reset}.\n"
     fi
 
     if echo "$socksproxy" | grep '^Enabled:' | grep -iq 'Yes';then
         server="$(networksetup -getsocksfirewallproxy $cnw | grep Server | perl -ne 'print $2 if /(Server:\s*)(.+)/')"
         port="$(networksetup -getsocksfirewallproxy $cnw | grep Port| perl -ne 'print $2 if /(Port:\s*)(.+)/')"
-        printf "socks proxy enabled at $green$server:$port$reset.\n"
+        printf "Socks proxy enabled at $green$server:$port$reset.\n"
     else
-        printf "socks proxy disabled.\n"
+        printf "Socks proxy ${red}disabled${reset}.\n"
     fi
 }
 
