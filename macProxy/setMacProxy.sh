@@ -60,6 +60,7 @@ usage(){
 		    unset   [http | https | socks | pac] (empty for all)
 
 		    editPac
+		    list|status
 
 	EOF
     exit 1
@@ -173,6 +174,44 @@ editPac(){
 
 }
 
+list(){
+    autoproxyurl="$(networksetup -getautoproxyurl $cnw)"
+    webproxy="$(networksetup -getwebproxy $cnw)"
+    securewebproxy="$(networksetup -getsecurewebproxy $cnw)"
+    socksproxy="$(networksetup -getsocksfirewallproxy $cnw)"
+
+    if  echo "$autoproxyurl"| grep '^Enabled:' | grep -iq 'Yes';then
+        url="$(networksetup -getautoproxyurl $cnw | perl -ne 'print $2 if /(URL:\s*)(.+)/')"
+        printf "Pac enabled at url: $green$url$reset\n"
+    else
+        printf "Pac disabled.\n"
+    fi
+
+    if echo "$webproxy" | grep '^Enabled:' | grep -iq 'Yes';then
+        server="$(networksetup -getwebproxy $cnw | grep Server | perl -ne 'print $2 if /(Server:\s*)(.+)/')"
+        port="$(networksetup -getwebproxy $cnw | grep Port| perl -ne 'print $2 if /(Port:\s*)(.+)/')"
+        printf "Http proxy enabled at $green$server:$port$reset.\n"
+    else
+        printf "Http proxy disabled.\n"
+    fi
+
+    if echo "$securewebproxy" | grep '^Enabled:' | grep -iq 'Yes';then
+        server="$(networksetup -getsecurewebproxy $cnw | grep Server | perl -ne 'print $2 if /(Server:\s*)(.+)/')"
+        port="$(networksetup -getsecurewebproxy $cnw | grep Port| perl -ne 'print $2 if /(Port:\s*)(.+)/')"
+        printf "Https proxy enabled at $green$server:$port$reset.\n"
+    else
+        printf "Https proxy disabled.\n"
+    fi
+
+    if echo "$socksproxy" | grep '^Enabled:' | grep -iq 'Yes';then
+        server="$(networksetup -getsocksfirewallproxy $cnw | grep Server | perl -ne 'print $2 if /(Server:\s*)(.+)/')"
+        port="$(networksetup -getsocksfirewallproxy $cnw | grep Port| perl -ne 'print $2 if /(Port:\s*)(.+)/')"
+        printf "socks proxy enabled at $green$server:$port$reset.\n"
+    else
+        printf "socks proxy disabled.\n"
+    fi
+}
+
 cmd=$1
 shift
 case $cmd in
@@ -193,6 +232,9 @@ case $cmd in
         ;;
     editPac)
         editPac "$@"
+        ;;
+    list|status)
+        list "$@"
         ;;
     *)
         usage
