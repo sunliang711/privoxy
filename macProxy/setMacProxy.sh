@@ -56,7 +56,7 @@ usage(){
 		    https   <port>
 		    socks   <port>
 
-		    pac     [upstream:default: localhost:1080] [protocol: default: SOCKS5] [serverport]
+		    pac     [upstream:default: localhost:1080] [protocol: default: SOCKS5]
 		    unset   [http | https | socks | pac] (empty for all)
 
 		    editPac
@@ -86,10 +86,26 @@ setSocksProxy(){
 }
 
 setPac(){
+    if networksetup -getautoproxyurl $cnw | grep Enabled | grep -qi Yes;then
+        echo 'Pac has already set.'
+        exit 1
+    fi
     pacServerHost=$host
     upstream=${1:-"localhost:1080"}
     protocol=${2:-"SOCKS5"}
-    pacServerPort=${3:-$defaultPacServerPort}
+    cat>pacUpstream<<-EOF
+    upstream=$upstream
+    protocol=$protocol
+EOF
+    pacServerPort=${defaultPacServerPort}
+    while lsof -iTCP -sTCP:LISTEN -P | grep -q ":\<${pacServerPort}\>";do
+        echo "Port: $pacServerPort is in use,try next..."
+        pacServerPort=$(($pacServerPort+1))
+    done
+    cat<<-EOF
+		pacServerHost: $pacServerHost
+		pacServerPort: $pacServerPort
+	EOF
     if [ ! -d pacDirectory ];then
         mkdir pacDirectory
     fi
@@ -101,10 +117,6 @@ setPac(){
         -e "s|PROTOCOL|$protocol|g" \
         $pacfile > pacDirectory/proxy.pac
 
-    cat<<-EOF
-		pacServerHost: $pacServerHost
-		pacServerPort: $pacServerPort
-	EOF
     launchctl unload -w $home/Library/LaunchAgents/pacServer.plist 2>/dev/null
     launchctl load -w $home/Library/LaunchAgents/pacServer.plist
     networksetup -setautoproxyurl $cnw "http://$host:$pacServerPort/proxy.pac"
@@ -125,6 +137,8 @@ unsetSocksProxy(){
 unsetPac(){
     launchctl unload -w $home/Library/LaunchAgents/pacServer.plist 2>/dev/null
     networksetup -setautoproxystate $cnw off
+    rm pacDirectory/proxy.pac 2>/dev/null
+    rm pacUpstream 2>/dev/null
 }
 
 unset(){
@@ -182,7 +196,10 @@ list(){
 
     if  echo "$autoproxyurl"| grep '^Enabled:' | grep -iq 'Yes';then
         url="$(networksetup -getautoproxyurl $cnw | perl -ne 'print $2 if /(URL:\s*)(.+)/')"
-        printf "Pac   enabled at url: $green$url$reset\n"
+        printf "Pac   enabled at url: $green$url$reset"
+        protocol=$(perl -ne 'print $2 if /(protocol=)(.+)/' pacUpstream)
+        upstream=$(perl -ne 'print $2 if /(upstream=)(.+)/' pacUpstream)
+        printf "\tupstream: \"${green}$protocol://$upstream${reset}\".\n"
     else
         printf "Pac   ${red}disabled${reset}.\n"
     fi
