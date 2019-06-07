@@ -8,7 +8,7 @@ fi
 root="$(cd $(dirname $rpath) && pwd)"
 cd "$root"
 
-cp sqlite3-autoconf-*.tar.gz /tmp
+cp sqlite-autoconf-*.tar.gz /tmp
 cd /tmp
 tar xvf ./sqlite-autoconf-*.tar.gz
 cd sqlite-autoconf*
