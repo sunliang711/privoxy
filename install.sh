@@ -54,6 +54,7 @@ function installPrivoxyFromSource(){
 }
 
 function install(){
+    cat installMessage
     cd "$root"
     echo "install()"
     check
