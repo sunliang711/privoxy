@@ -94,7 +94,7 @@ function install(){
             sudo ln -sf $root/pctl /usr/local/bin
         ;;
         Darwin)
-            ln -sf $root/pctl /usr/local/bin
+            sudo ln -sf $root/pctl /usr/local/bin
         ;;
     esac
 }

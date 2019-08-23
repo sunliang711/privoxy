@@ -11,6 +11,7 @@ cd "$root"
 cp sqlite-autoconf-*.tar.gz /tmp
 cd /tmp
 tar xvf ./sqlite-autoconf-*.tar.gz
+rm ./sqlite-autoconf-*.tar.gz
 cd sqlite-autoconf*
 ./configure --prefix="$prefix"
 make
