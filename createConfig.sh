@@ -86,5 +86,6 @@ case $(uname) in
             -e "s|PRIVOXY|$(which privoxy)|g" -e "s|ROOT|$root|g" template/privoxy.service > runtime/$servicename.service
         runAsRoot ln -sf "$root/runtime/$servicename.service" /etc/systemd/system
         runAsRoot systemctl daemon-reload
+        runAsRoot systemctl enable $servicename
     ;;
 esac

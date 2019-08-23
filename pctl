@@ -123,7 +123,7 @@ list(){
 }
 
 delete(){
-    id=${1:?'missing id'}
+    id=${1:?"${red}missing id${reset}"}
     NAME="$(bash name.sh $id)"
     if [ -z "$NAME" ];then
         exit 1
@@ -139,7 +139,7 @@ delete(){
 }
 
 start(){
-    id=${1:?'missing id'}
+    id=${1:?"${red}missing id${reset}"}
     #tmux new-session -d -s "pac" privoxy --no-daemon --pidfile /tmp/pac.privoxy.pid $root/runtime/pac.config
     #tmux new-window -d -t "privoxy"  privoxy --no-daemon --pidfile /tmp/global.privoxy.pid $root/runtime/global.config
     #tmux new-session -d -s "global"  privoxy --no-daemon --pidfile /tmp/global.privoxy.pid $root/runtime/global.config
@@ -158,25 +158,32 @@ start(){
             fi
             ;;
         Darwin)
-            launchctl load -w $home/Library/LaunchAgents/$servicename.plist
-            echo "Set system http and https proxy? [y/n]"
-            read ans
-            if [ "$ans" == 'y' ];then
+            if launchctl list | grep -q "\b$servicename\b";then
+                echo "${red}service $servicename already loaded.${reset}"
+                exit 1
+            fi
+            launchctl load -w $home/Library/LaunchAgents/$servicename.plist || echo "already start"
+            # echo "Set system http and https proxy? [y/n]"
+            # read ans
+            # if [ "$ans" == 'y' ];then
                 record="$(bash queryById.sh $id)"
                 #must set IFS
                 IFS=$'|'
                 #must use "$record" instead of $record
                 read unuse_name local_port upstream logdir ispac <<< "$record"
+                echo "${green}clear mac proxy.${reset}"
                 bash macProxy/setMacProxy.sh unset
+                echo "set http proxy: ${local_port}"
                 bash macProxy/setMacProxy.sh http ${local_port}
+                echo "set https proxy: ${local_port}"
                 bash macProxy/setMacProxy.sh https ${local_port}
-            fi
+            # fi
             ;;
     esac
 }
 
 stop(){
-    id=${1:?'missing id'}
+    id=${1:?"${red}missing id${reset}"}
     NAME="$(bash name.sh $id)"
     if [ -z "$NAME" ];then
         echo "No such service with id: $id"
@@ -197,17 +204,18 @@ stop(){
             ;;
         Darwin)
             launchctl unload -w $home/Library/LaunchAgents/$servicename.plist
-            echo "Clear system http and https proxy? [y/n]"
-            read ans
-            if [ "$ans" == 'y' ];then
+            # echo "Clear system http and https proxy? [y/n]"
+            # read ans
+            # if [ "$ans" == 'y' ];then
+                echo "${green}clear mac proxy.${reset}"
                 bash macProxy/setMacProxy.sh unset
-            fi
+            # fi
             ;;
     esac
 }
 
 status(){
-    id=${1:?'missing id'}
+    id=${1:?"${red}missing id${reset}"}
     NAME="$(bash name.sh $id)"
     if [ -z "$NAME" ];then
         echo "No such service with id: $id"
@@ -271,8 +279,7 @@ pac(){
 }
 
 log(){
-    id=${1:?'missing id'}
-
+    id=${1:?"${red}missing id${reset}"}
     NAME="$(bash name.sh $id)"
     if [ -z "$NAME" ];then
         exit 1
@@ -287,7 +294,7 @@ log(){
 }
 
 edit(){
-    id=${1:?'missing id'}
+    id=${1:?"${red}missing id${reset}"}
     shift
     record="$(bash queryById.sh $id)"
     if [ -z $record ];then
@@ -350,7 +357,7 @@ edit(){
 }
 
 copy(){
-    id=${1:?'missing id'}
+    id=${1:?"${red}missing id${reset}"}
     newid=${2}
     record="$(bash queryById.sh $id)"
     if [ -z $record ];then
