@@ -270,10 +270,10 @@ pac(){
     newmd5sum="$(python md5.py ${pacFile})"
     # if ! sha1sum -c --status "${pacFile}.sha1";then
     if [ "$newmd5sum" != "$oldmd5sum" ];then
-        echo "${blue}Pac file changed."
+        echo "${blue}Pac file changed.${reset}"
         restartPac
     else
-        echo "${cyan}Pac file not changed."
+        echo "${cyan}Pac file not changed.${reset}"
     fi
     # rm "${pacFile}.sha1"
 }
