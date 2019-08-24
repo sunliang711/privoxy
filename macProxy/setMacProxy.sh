@@ -68,20 +68,20 @@ usage(){
 
 setHttpProxy(){
     port=${1:?'missing port'}
-    msg
+    # msg
     networksetup -setwebproxy $cnw $host $port
 }
 
 setHttpsProxy(){
     port=${1:?'missing port'}
-    msg
+    # msg
     networksetup -setsecurewebproxy $cnw $host $port
 }
 
 
 setSocksProxy(){
     port=${1:?'missing port'}
-    msg
+    # msg
     networksetup -setsocksfirewallproxy $cnw $host $port
 }
 
