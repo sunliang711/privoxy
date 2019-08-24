@@ -263,11 +263,20 @@ pac(){
     # if ! sha1sum -c --status "${pacFile}.sha1";then
     if [ "$newmd5sum" != "$oldmd5sum" ];then
         echo "${blue}Pac file changed."
-        echo "Restart related service when needed."
+        restartPac
     else
         echo "${cyan}Pac file not changed."
     fi
     # rm "${pacFile}.sha1"
+}
+
+restartPac(){
+    ids="$(sqlite3 "$db" "select id from config where ispac=1;")"
+    for id in $ids;do
+        echo "restart: $id"
+        stop $id
+        start $id
+    done
 }
 
 log(){
@@ -343,7 +352,9 @@ edit(){
 
     if [ $changed == 1 ];then
         sqlite3 "$db" "update config set name='$name',local_port=$local_port,upstream='$upstream',logdir='$logdir',ispac='$ispac' where id=$id;"
-        echo "Please restart manaually"
+        echo "Restart $id"
+        stop $id
+        start $id
     else
         echo "No change."
     fi
