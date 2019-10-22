@@ -10,7 +10,7 @@
     <array>
         <string>PYTHON</string>
         <string>-m</string>
-        <string>SimpleHTTPServer</string>
+        <string>MODULE</string>
         <string>PORT</string>
     </array>
     <key>StandardOutPath</key>

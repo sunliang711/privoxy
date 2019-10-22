@@ -109,8 +109,22 @@ EOF
     if [ ! -d pacDirectory ];then
         mkdir pacDirectory
     fi
+    pythonMajorVer=$(python -V 2>&1|awk '{print $2}'|awk -F. '{print $1}')
+    case $pythonMajorVer in
+        2)
+            module=SimpleHTTPServer
+            ;;
+        3)
+            module=http.server
+            ;;
+        *)
+            echo "python major version invalid!!"
+            exit 1
+            ;;
+    esac
     sed -e "s|PACDIRECTORY|$root/pacDirectory|g" \
         -e "s|PYTHON|$(which python)|g" \
+        -e "s|MODULE|$module|g" \
         -e "s|PORT|$pacServerPort|g" pacServer.plist > $home/Library/LaunchAgents/pacServer.plist
 
     sed -e "s|UPSTREAM|$upstream|g" \
