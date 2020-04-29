@@ -52,9 +52,9 @@ usage(){
 	Usage: $(basename $0) CMD
 
 		CMD:
-		    http    <port>
-		    https   <port>
-		    socks   <port>
+		    http    [-h <host>] [-u <user> -p <password> ] <port>
+		    https   [-h <host>] [-u <user> -p <password> ] <port>
+		    socks   [-h <host>] [-u <user> -p <password> ] <port>
 
 		    pac     [upstream:default: localhost:1080] [protocol: default: SOCKS5]
 		    unset   [http | https | socks | pac] (empty for all)
@@ -66,23 +66,54 @@ usage(){
     exit 1
 }
 
-setHttpProxy(){
+setProxy(){
+    proxyCmd=$1
+    shift
+
+    while getopts ":h:u:p:" opt;do
+        case "$opt" in
+            h)
+                host=$OPTARG
+                ;;
+            u)
+                user=$OPTARG
+                ;;
+            p)
+                password=$OPTARG
+                ;;
+            :)
+                echo "Missing option for option '$OPTARG'"
+                return 1
+                ;;
+            \?)
+                echo "Unknown option '$OPTARG'"
+                ;;
+        esac
+    done
+    shift $((OPTIND-1))
+
     port=${1:?'missing port'}
     # msg
-    networksetup -setwebproxy $cnw $host $port
+    if [ -n "$user" ] && [ -n "$password" ];then
+        echo "networksetup -$proxyCmd $cnw $host $port on $user $password"
+        networksetup -$proxyCmd $cnw $host $port on $user $password
+    else
+        echo "networksetup -$proxyCmd $cnw $host $port"
+        networksetup -$proxyCmd $cnw $host $port
+    fi
+}
+
+setHttpProxy(){
+    setProxy setwebproxy "$@"
 }
 
 setHttpsProxy(){
-    port=${1:?'missing port'}
-    # msg
-    networksetup -setsecurewebproxy $cnw $host $port
+    setProxy setsecurewebproxy "$@"
 }
 
 
 setSocksProxy(){
-    port=${1:?'missing port'}
-    # msg
-    networksetup -setsocksfirewallproxy $cnw $host $port
+    setProxy setsocksfirewallproxy "$@"
 }
 
 setPac(){
