@@ -83,6 +83,7 @@ case $(uname) in
     Linux)
         log "Making service file($servicename)..."
         sed -e "s|SERVICENAME|$servicename|g" -e "s|CONFIGFILE|$configfile|g" \
+            -e "s|USER|$user|g" \
             -e "s|PRIVOXY|$(which privoxy)|g" -e "s|ROOT|$root|g" template/privoxy.service > runtime/$servicename.service
         runAsRoot ln -sf "$root/runtime/$servicename.service" /etc/systemd/system
         runAsRoot systemctl daemon-reload

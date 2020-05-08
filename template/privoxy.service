@@ -6,6 +6,7 @@ After=network.target
 Environment=PIDFILE=/tmp/SERVICENAME.pid
 Environment=CONFIG=ROOT/runtime/CONFIGFILE
 Type=forking
+User=USER
 PIDFile=/tmp/SERVICENAME.pid
 ExecStart=PRIVOXY --pidfile $PIDFILE $CONFIG
 ExecStopPost=/bin/rm -f $PIDFILE
