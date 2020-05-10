@@ -508,6 +508,7 @@ shadowsocks      = +forward-override{forward-socks5 UPSTREAM .}
 .xn--9trs65b.com
 .zukunftswerkstatt.de
 
+.sourceforge.net
 .askubuntu.com
 .blogoverflow.com
 .mathoverflow.net
@@ -674,6 +675,7 @@ shadowsocks      = +forward-override{forward-socks5 UPSTREAM .}
 .ggpht.cn
 .ggpht.com
 .googlevideo.com
+.googleadservices.com
 .withyoutube.com
 .youtu.be
 .youtube-nocookie.com
@@ -710,3 +712,4 @@ shadowsocks      = +forward-override{forward-socks5 UPSTREAM .}
 .whatsapp.com
 .whatsapp.net
 
+.etherscan.io
