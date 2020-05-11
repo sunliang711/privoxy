@@ -52,6 +52,7 @@ usage(){
 	    list
 	    del         <id>
 	    pac         <id>    "edit pac file"
+	    updatePac
 	    log         <id>
 	    edit        <id>    [-n NAME] [-l LOCAL_PORT] [-u UPSTREAM] [-L LOGDIR] [-p ISPAC]
 	    copy|cp     <id>    [newid]
@@ -384,6 +385,33 @@ copy(){
 
 }
 
+updatePac(){
+    # local timestamp=$(date +%FT%T)
+    local localPac=template/pac.action
+    local remotePac=/tmp/remotePac-${timestamp}
+    local remotePacURL="https://source711.oss-cn-shanghai.aliyuncs.com/pac/pac.action"
+    echo "Download remote pac file from: $remotePacURL to $remotePac"
+    curl -L -o $remotePac $remotePacURL || { echo "Download error"; exit 1; }
+
+    #1. get local pac header
+    local localPacHeader=/tmp/pacHeader-${timestamp}
+    sed -n -e '1,/{pac}/p' $localPac > $localPacHeader
+
+    #2. get local pac body
+    local localPacBody=/tmp/pacBody-${timestamp}
+    sed -n -e '/{pac}/,$p' $localPac | sed -n -e '2,$p' > $localPacBody
+
+    #3. get remote pac body
+    local remotePacBody=/tmp/remotePacBody-${timestamp}
+    sed -n -e '/{pac}/,$p' $remotePac | sed -n -e '2,$p' > $remotePacBody
+
+    #4. merget localPacBody with remotePacBody
+    cat $localPacHeader > $localPac
+    cat $localPacBody $remotePacBody | sort | uniq | sed '/^$/d' >> $localPac
+    echo "Please restart privoxy to apply new pac setting"
+
+}
+
 em(){
     editor=vi
     if command -v vim>/dev/null 2>&1;then
@@ -439,6 +467,9 @@ case $cmd in
         ;;
     pac)
         pac
+        ;;
+    updatePac)
+        updatePac "$@"
         ;;
     status)
         status "$@"
