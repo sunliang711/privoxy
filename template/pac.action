@@ -9,6 +9,7 @@ shadowsocks      = +forward-override{forward-socks5 UPSTREAM .}
 .golang.org
 .go.dev
 
+.dns.google
 .google.ad
 .google.ae
 .google.al
@@ -774,3 +775,7 @@ cfus.aliyun.com
 .etherscan.io
 喵帕斯
 .xn--i2ru8q2qg.com
+
+.w3schools.com
+
+.merlinblog.xyz
