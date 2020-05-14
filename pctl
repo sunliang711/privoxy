@@ -300,6 +300,13 @@ log(){
     # must use "$record" instead of $record
     read name local_port upstream logdir ispac <<< "$record"
     logfile="$NAME.log"
+    local lines=$(wc -l $logdir/$logfile | awk '{print $1}')
+    local limitLines=20000
+    if (($lines > $limitLines));then
+        echo "*********************************Note************************************"
+        echo "logfile:$logdir/$logfile greater than $limitLines lines."
+        echo "*********************************Note************************************"
+    fi
     tail -f $logdir/$logfile
 }
 
