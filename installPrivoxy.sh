@@ -17,7 +17,7 @@ cp privoxy-3.0.24*tar.gz /tmp
 # curl -LO https://svwh.dl.sourceforge.net/project/ijbswa/Sources/3.0.24%20%28stable%29/privoxy-3.0.24-stable-src.tar.gz
 cd /tmp
 tar xvf privoxy-3.0*
-cd privoxy-3.0*
+cd privoxy-3.0.24-stable
 autoheader
 autoconf
 ./configure
